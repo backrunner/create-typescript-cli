@@ -1,6 +1,6 @@
 node_modules/
-build/
-dist/
+bin/
+templates/
 **/*.min.js
 **/*-min.js
 **/*.bundle.js

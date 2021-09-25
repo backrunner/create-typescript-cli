@@ -1,6 +1,6 @@
 {
   "name": "create-typescript-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Quickly staring a Typescript cli project",
   "main": "./bin/cli.js",
   "bin": {
@@ -17,35 +17,38 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/backrunner/ts-cli-boilerplate.git"
+    "url": "git+https://github.com/backrunner/create-typescript-cli.git"
   },
   "keywords": [
-    "boilerplate",
     "typescript",
     "cli"
   ],
   "author": "BackRunner",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/backrunner/ts-cli-boilerplate/issues"
+    "url": "https://github.com/backrunner/create-typescript-cli/issues"
   },
-  "homepage": "https://github.com/backrunner/ts-cli-boilerplate#readme",
+  "homepage": "https://github.com/backrunner/create-typescript-cli#readme",
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/preset-env": "^7.15.6",
     "@babel/preset-typescript": "^7.15.0",
+    "@backrunner/rollup-plugin-string": "^3.1.1",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-node-resolve": "^13.0.5",
     "@types/chalk": "^2.2.0",
-    "@types/inquirer": "^7.3.3",
+    "@types/ejs": "^3.1.0",
+    "@types/inquirer": "^8.1.2",
     "f2elint": "^1.2.1",
-    "rollup": "^2.56.3",
+    "rollup": "^2.57.0",
+    "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.4.3"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
-    "inquirer": "^7.3.3",
+    "chalk": "^4.1.2",
+    "ejs": "^3.1.6",
+    "inquirer": "^8.1.5",
     "spdx-license-ids": "^3.0.10"
   }
 }

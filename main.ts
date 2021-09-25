@@ -3,9 +3,12 @@ import childProcess from 'child_process';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import path from 'path';
+import ejs from 'ejs';
 import fs from 'fs';
+import fsp from 'fs/promises';
 import spdxList from 'spdx-license-ids';
 import { repos } from './consts';
+import README_TEMPLATE from './templates/Readme.md.ejs';
 
 interface UserInfo {
   name: string;
@@ -20,6 +23,9 @@ interface UserInfo {
 interface GitOptions {
   commitMsg: string;
 }
+
+const UNNECESSARY_FILES = ['./CHANGELOG.md'];
+const UNNECESSARY_PACKAGE_INFO = ['keywords', 'bugs', 'repository', 'homepage'];
 
 const licenseIds = spdxList.map((item) => item.toLowerCase());
 
@@ -95,7 +101,7 @@ const init = async () => {
   ]);
   const projectPath = path.resolve(process.cwd(), `./${userInfo.name}`);
   if (fs.existsSync(projectPath)) {
-    const stat = fs.statSync(projectPath);
+    const stat = await fsp.stat(projectPath);
     if (stat.isDirectory()) {
       const confirm = await inquirer.prompt({
         type: 'confirm',
@@ -113,11 +119,11 @@ const init = async () => {
         default: false,
       });
       if (delConfirm.v) {
-        fs.rmSync(projectPath, { recursive: true, force: true });
+        await fsp.rm(projectPath, { recursive: true, force: true });
       }
     }
   } else {
-    fs.mkdirSync(projectPath);
+    await fsp.mkdir(projectPath);
   }
   // clone repo
   console.log(chalk.cyan('Very well, next we will clone the boilerplate into the project folder.'));
@@ -127,6 +133,12 @@ const init = async () => {
     stdio: 'inherit',
     cwd: projectPath,
   });
+  // delete unnecessary files
+  await Promise.all(
+    UNNECESSARY_FILES.map((filePath) => {
+      return fsp.rm(path.resolve(projectPath, filePath), { force: true });
+    }),
+  );
   // install dependencies
   console.log(chalk.cyan('Looks good, we still need to do some final work to finish.'));
   childProcess.execSync('npm install', {
@@ -145,10 +157,12 @@ const init = async () => {
       version,
       description: desc,
     });
-    if (!packageInfo.bin) {
-      packageInfo.bin = {};
-    }
-    packageInfo.bin[userInfo.cliName] = './bin/cli.js';
+    packageInfo.bin = {
+      [userInfo.cliName]: './bin/cli.js',
+    };
+    UNNECESSARY_PACKAGE_INFO.forEach((key) => {
+      delete packageInfo[key];
+    });
     fs.writeFileSync(packageInfoPath, JSON.stringify(packageInfo, null, '  '), {
       encoding: 'utf-8',
     });
@@ -159,8 +173,46 @@ const init = async () => {
       ),
     );
   }
+  // modify Readme.md
+  const potentialReadmePath = ['./reamde.md', './README.md', './Readme.md'];
+  const readmePath = path.resolve(projectPath, './Readme.md');
+  const readmeExists = potentialReadmePath.reduce(
+    (res, item) => {
+      if (res.exists) {
+        return res;
+      }
+      const itemPath = path.resolve(projectPath, item);
+      if (fs.existsSync(itemPath)) {
+        return {
+          exists: true,
+          path: itemPath,
+        };
+      }
+      return res;
+    },
+    {
+      exists: false,
+      path: '',
+    },
+  );
+  if (readmeExists.exists) {
+    await fsp.rm(readmeExists.path, { force: true });
+  }
+  await fsp.writeFile(
+    readmePath,
+    ejs.render(README_TEMPLATE, {
+      name: userInfo.name,
+      desc: userInfo.desc,
+      license: userInfo.license,
+    }),
+    { encoding: 'utf-8' },
+  );
   // git
   if (userInfo.useGit) {
+    const gitDataPath = path.resolve(projectPath, './.git');
+    if (fs.existsSync(gitDataPath)) {
+      await fsp.rm(gitDataPath, { recursive: true, force: true });
+    }
     console.log(chalk.cyan('Creating git repository...'));
     childProcess.execSync(`git init && git add . && git commit -m "${gitOptions.commitMsg}"`, {
       cwd: projectPath,

@@ -1,36 +1,22 @@
-# ts-cli-boilerplate
+# create-typescript-cli
 
-Starting a Typescript cli project instantly.
+This tool can help you to create your own TypeScript command line tool project in about 1 minute.
 
 ## Usage
 
-Clone this boilerplate by git:
+There's only one command you need to run:
 
 ```bash
-git clone https://github.com/backrunner/ts-cli-boilerplate.git -b main --depth 1
+npm create typescript-cli
 ```
 
-And installing dependencies by npm:
+Then follow the info form the tool required, tool will create a TypeScript cli project automatically.
 
-```bash
-npm install
-```
+## Boilerplate
 
-After installing, modify the properties in the `package.json`, like `name`, `homepage`, `repository`, and so on.
+We use `backrunner/ts-cli-boilerplate` to initialize the new project.
 
-Also remember to modify the `Readme.md`.
-
-Finally using `npm run build` to build your project.
-
-## Intergrated packages
-
-- Rollup (with babel, node-resolve, json plugins).
-
-- TypeScript and Babel.
-
-- Commander.js, Inquirer.js, chalk.
-
-- f2elint (useful lint initializer from alibaba).
+Repo: [https://github.com/backrunner/ts-cli-boilerplate](https://github.com/backrunner/ts-cli-boilerplate)
 
 ## License
 
