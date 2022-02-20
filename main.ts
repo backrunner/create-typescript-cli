@@ -91,14 +91,17 @@ const init = async () => {
       default: true,
     },
   ]);
-  const gitOptions: GitOptions = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'commitMsg',
-      message: 'First commit message: ',
-      default: 'First commit',
-    },
-  ]);
+  let gitOptions: GitOptions | null = null;
+  if (userInfo.useGit) {
+    gitOptions = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'commitMsg',
+        message: 'First commit message: ',
+        default: 'First commit',
+      },
+    ]);
+  }
   const projectPath = path.resolve(process.cwd(), `./${userInfo.name}`);
   if (fs.existsSync(projectPath)) {
     const stat = await fsp.stat(projectPath);
@@ -207,16 +210,20 @@ const init = async () => {
     }),
     { encoding: 'utf-8' },
   );
-  // git
+  // setup git
+  const gitDataPath = path.resolve(projectPath, './.git');
+  if (fs.existsSync(gitDataPath)) {
+    // whether user determined, remove the original .git folder
+    await fsp.rm(gitDataPath, { recursive: true, force: true });
+  }
   if (userInfo.useGit) {
-    const gitDataPath = path.resolve(projectPath, './.git');
-    if (fs.existsSync(gitDataPath)) {
-      await fsp.rm(gitDataPath, { recursive: true, force: true });
-    }
     console.log(chalk.cyan('Creating git repository...'));
-    childProcess.execSync(`git init && git add . && git commit -m "${gitOptions.commitMsg}"`, {
-      cwd: projectPath,
-    });
+    childProcess.execSync(
+      `git init && git add . && git commit -m "${gitOptions?.commitMsg || 'First commit'}"`,
+      {
+        cwd: projectPath,
+      },
+    );
   }
   // done
   console.log(
