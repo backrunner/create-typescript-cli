@@ -1,6 +1,6 @@
 {
   "name": "create-typescript-cli",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Quickly staring a Typescript cli project",
   "main": "./bin/cli.js",
   "bin": {

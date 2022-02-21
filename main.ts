@@ -126,7 +126,7 @@ const init = async () => {
       }
     }
   } else {
-    await fsp.mkdir(projectPath);
+    await fsp.mkdir(projectPath, { recursive: true });
   }
   // clone repo
   console.log(chalk.cyan('Very well, next we will clone the boilerplate into the project folder.'));
