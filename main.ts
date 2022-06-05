@@ -7,6 +7,7 @@ import ejs from 'ejs';
 import fs from 'fs';
 import fsp from 'fs/promises';
 import spdxList from 'spdx-license-ids';
+import npmName from 'npm-name';
 import { repos } from './consts';
 import README_TEMPLATE from './templates/Readme.md.ejs';
 
@@ -38,10 +39,30 @@ const init = async () => {
     {
       type: 'input',
       name: 'name',
-      message: 'Project Name: ',
-      validate: (v) => {
+      message: 'Package Name: ',
+      validate: async (v) => {
         if (!v) {
-          return 'Project name should not be empty.';
+          return 'Package name should not be empty.';
+        }
+
+        let checkRes = true;
+        try {
+          checkRes = await npmName(v);
+        } catch (err: unknown) {
+          return (err as Error).message;
+        }
+
+        if (!checkRes) {
+          const confirmRes = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'stillUse',
+              message: 'This package name has existed on npm, still use it?',
+            },
+          ]);
+          if (!confirmRes.stillUse) {
+            return 'Package name existed on npm.';
+          }
         }
         return true;
       },
@@ -54,7 +75,6 @@ const init = async () => {
         if (!v) {
           return 'Command line interface name should not be empty.';
         }
-        return true;
       },
     },
     {
@@ -81,7 +101,9 @@ const init = async () => {
       message: 'License: ',
       default: 'MIT',
       validate: (v) => {
-        return licenseIds.includes(v.toLowerCase()) ? true : 'Invalid license.';
+        return licenseIds.includes(v.toLowerCase())
+          ? true
+          : 'Invalid license.\nLicense should be the identifier in the SPDX License list.\nSee https://spdx.org/licenses/ for more details.';
       },
     },
     {
